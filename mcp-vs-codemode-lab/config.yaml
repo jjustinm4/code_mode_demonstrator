@@ -1,0 +1,45 @@
+# Defaults for mcp-vs-codemode-lab. Everything tunable lives here.
+
+llm:
+  base_url: http://localhost:8080      # llama-server (started by you, never by this tool)
+  temperature: 0
+  max_tokens: 1500                     # cap per model call
+  max_turns: 12                        # tool-calling round trips per run (+1 forced final-answer call)
+  run_timeout_s: 600                   # wall-clock limit per run
+  request_timeout_s: 300               # single HTTP request limit
+
+stack:
+  compose_file: docker-compose.yml
+  project: mcplab
+  app_container: lab-app
+  db_container: lab-db
+  app_port: 18080                      # host port mapped to the app
+  app_memory: 256m
+  db_memory: 256m
+  db_max_connections: 20
+  db_user: lab                         # superuser, used by tools (reserved slots)
+  db_name: lab
+  health_timeout_s: 90                 # how long reset waits for /health = 200
+
+injection:
+  settle_s: 6                          # wait after injection so logs show symptoms
+  oom_memory_limit: 80m                # tiny limit applied to the app for the oom scenario
+  oom_min_free_ram_gb: 2.0             # skip oom if host MemAvailable is below this
+  conn_holders: 17                     # max_connections - superuser_reserved_connections
+  bad_db_host: db-primary.internal
+
+sandbox:
+  timeout_s: 30
+  stdout_cap: 4000
+  traceback_cap: 1500
+  memory_limit_mb: 512
+
+benchmark:
+  scenarios: [control, crash, oom, db_conn_exhaustion, slow_query, bad_config]
+  demo_scenarios: [crash, db_conn_exhaustion]
+  fix_scenarios: [crash, bad_config]
+  scaling_extra_tools: [0, 25, 100]
+  # rough per-run wall-clock estimates used for the runtime estimate at startup
+  est_native_s: 90
+  est_code_s: 90
+  est_reset_s: 15

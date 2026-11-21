@@ -1,0 +1,44 @@
+MCP vs Code Mode · ggml-org/gpt-oss-20b-GGUF · n_ctx 8192 · 2026-11-21
+                                                                                                              
+ Scenario                  Mode       Total tokens   Peak context       Round trips      Time   Result        
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 
+ control                   native           40,004   ████░░░░  48%               13       52s   ✓ max_turns   
+ control                   code             24,731   ███░░░░░  40%               13     1m19s   ✗ max_turns   
+ crash                     native           40,247   ████░░░░  49%               13     1m05s   ✓ max_turns   
+ crash                     code             19,466   ███░░░░░  33%               12     1m01s   ✗             
+ oom                       native           20,473   ███░░░░░  37%                8       33s   ✓             
+ oom                       code             23,868   ███░░░░░  38%               13     1m02s   ✓ max_turns   
+ db_conn_exhaustion        native           24,364   █████░░░  58%                7       40s   ✓             
+ db_conn_exhaustion        code             15,455   ███░░░░░  34%                9       51s   ✓             
+ slow_query                native           23,054   ████░░░░  51%                7       39s   ✓             
+ slow_query                code             25,976   ██████░░  69%               10     1m22s   ✓             
+ bad_config                native           26,632   ████░░░░  52%                8       48s   ✓             
+ bad_config                code             19,578   ███░░░░░  40%               10     1m01s   ✓             
+                                                                                                              
+Per-scenario summary (mean over repeats)                                                                      
+                                                                                                              
+ Scenario                  Native tokens   Code tokens   Δ tokens   Ctx native   Ctx code   Native ✓   Code ✓ 
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 
+ control                          40,004        24,731       -38%          48%        40%     1/1       0/1   
+ crash                            40,247        19,466       -52%          49%        33%     1/1       0/1   
+ oom                              20,473        23,868       +17%          37%        38%     1/1       1/1   
+ db_conn_exhaustion               24,364        15,455       -37%          58%        34%     1/1       1/1   
+ slow_query                       23,054        25,976       +13%          51%        69%     1/1       1/1   
+ bad_config                       26,632        19,578       -26%          52%        40%     1/1       1/1   
+                                                                                                              
+Tool-definition tokens vs tool count (sent with every request)                                                
+                                                                                                              
+   Extra tools     Native tools     Native def tokens    % of context     Code Mode def tokens   % of context 
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 
+             0               50                 1,826             22%                      122           1.5% 
+            25               75                 3,260             40%                      122           1.5% 
+           100              150                 7,766             95%                      122           1.5% 
+                                                                                                              
++- Headline -------------------------------------------------------------------------------------------------+
+| Code Mode used 26% fewer tokens across 6 scenarios (129,074 vs 174,774); native overflowed context in 0    |
+| runs.                                                                                                      |
+| Correct diagnoses: native 6/6, Code Mode 4/6.                                                              |
+| Code Mode used MORE tokens in: oom, slow_query.                                                            |
+| Code Mode was less accurate in: control, crash.                                                            |
+| Code Mode errors: control (max_turns), oom (max_turns).                                                    |
++------------------------------------------------------------------------------------------------------------+
