@@ -1,0 +1,57 @@
+# Target stack for the benchmark: one web app + one PostgreSQL, both memory-limited.
+# Values come from config.yaml via env (injector.py passes them); DB_HOST and APP_RESTART are env-driven so injector.py can recreate the app with a bad config.
+name: mcplab
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: lab-db
+    environment:
+      POSTGRES_USER: lab
+      POSTGRES_PASSWORD: lab
+      POSTGRES_DB: lab
+    command:
+      - postgres
+      - -c
+      - max_connections=${DB_MAX_CONNECTIONS:-20}
+      - -c
+      - log_lock_waits=on
+      - -c
+      - deadlock_timeout=1s
+      - -c
+      - log_min_duration_statement=2000
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - dbdata:/var/lib/postgresql/data
+    mem_limit: ${DB_MEMORY:-256m}
+    memswap_limit: ${DB_MEMORY:-256m}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lab -d lab"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+
+  app:
+    build: ./app
+    image: mcplab-app:latest
+    container_name: lab-app
+    environment:
+      DB_HOST: ${DB_HOST:-db}
+      DB_PORT: "5432"
+      DB_NAME: lab
+      DB_USER: appuser
+      DB_PASSWORD: apppass
+      STATEMENT_TIMEOUT_MS: "3000"
+      LOG_LEVEL: INFO
+    ports:
+      - "${APP_PORT:-18080}:8000"
+    mem_limit: ${APP_MEMORY:-256m}
+    memswap_limit: ${APP_MEMORY:-256m}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: ${APP_RESTART:-no}
+
+volumes:
+  dbdata:

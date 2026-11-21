@@ -1,0 +1,13 @@
+scenario,mode,extra_tools,repeat,prompt_tokens_total,completion_tokens_total,reasoning_tokens,peak_prompt_tokens,peak_context_percent,round_trips,tool_calls,tool_definition_tokens,seconds,correct,error
+control,native,0,1,39450,554,191,3942,48.1,13,12,1822,52.0,True,max_turns
+control,code,0,1,23543,1188,658,3302,40.3,13,12,118,78.9,False,max_turns
+crash,native,0,1,39315,932,474,3994,48.8,13,12,1822,65.2,True,max_turns
+crash,code,0,1,18649,817,325,2679,32.7,12,11,118,61.2,False,
+oom,native,0,1,20038,435,153,3015,36.8,8,7,1822,33.3,True,
+oom,code,0,1,23102,766,243,3093,37.8,13,12,118,62.0,True,max_turns
+db_conn_exhaustion,native,0,1,23853,511,197,4740,57.9,7,6,1822,40.1,True,
+db_conn_exhaustion,code,0,1,14762,693,245,2748,33.5,9,8,118,51.3,True,
+slow_query,native,0,1,22511,543,257,4146,50.6,7,6,1822,39.4,True,
+slow_query,code,0,1,24851,1125,310,5654,69.0,10,9,118,82.3,True,
+bad_config,native,0,1,26099,533,210,4227,51.6,8,7,1822,47.9,True,
+bad_config,code,0,1,18772,806,319,3276,40.0,10,9,118,60.8,True,
